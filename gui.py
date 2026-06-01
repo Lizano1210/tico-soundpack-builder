@@ -10,6 +10,7 @@ from PIL import Image
 from language import LANGUAGES
 from validator import SoundValidator
 from exporter import SoundpackExporter
+from utils import resource_path
 
 
 class SoundpackBuilderApp(ctk.CTk):
@@ -22,7 +23,7 @@ class SoundpackBuilderApp(ctk.CTk):
         # ==================================================
 
         self.title("TICO Soundpack Builder")
-        self.iconbitmap("assets/tsb.ico")
+        self.iconbitmap(resource_path("assets/tsb.ico"))
         self.geometry("1000x800")
         self.resizable(False, False)
 
@@ -51,7 +52,7 @@ class SoundpackBuilderApp(ctk.CTk):
     def load_formats(self):
 
         with open(
-            "assets/formats.json",
+            resource_path("assets/formats.json"),
             "r",
             encoding="utf-8"
         ) as file:
@@ -173,7 +174,7 @@ class SoundpackBuilderApp(ctk.CTk):
             pady=10
         )
 
-        image = Image.open("assets/tico_logo.png")
+        image = Image.open(resource_path("assets/tico_logo.png"))
 
         logo = ctk.CTkImage(
             light_image=image,
