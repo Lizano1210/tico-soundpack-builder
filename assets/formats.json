@@ -1,0 +1,13 @@
+{
+    "navigation": "mp3",
+    "section_navigation": "mp3",
+    "section_enter": "mp3",
+    "section_exit": "mp3",
+    "intro_screen_home": "mp3",
+    "intro_screen_games": "mp3",
+    "intro_screen_retro": "mp3",
+    "home_intro": "mp3",
+    "click": "mp3",
+    "quick_menu": "mp3",
+    "background_music": "opus"
+}
