@@ -1,5 +1,7 @@
 # gui.py
 
+from PIL import Image, ImageTk
+import sys
 import json
 from pathlib import Path
 from tkinter import filedialog, messagebox
@@ -23,7 +25,10 @@ class SoundpackBuilderApp(ctk.CTk):
         # ==================================================
 
         self.title("TICO Soundpack Builder")
-        self.iconbitmap(resource_path("assets/tsb.ico"))
+        if sys.platform == "win32":
+            self.iconbitmap(resource_path("assets/tsb.ico"))
+        else:
+            self.iconphoto(True, ImageTk.PhotoImage(Image.open(resource_path("assets/tico_logo.png"))))
         self.geometry("1000x800")
         self.resizable(False, False)
 
