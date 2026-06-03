@@ -21,7 +21,17 @@ LANGUAGES = {
         "export_error": "Ocurrió un error durante la exportación.",
 
         "status_selected": "Seleccionado",
-        "status_missing": "No seleccionado"
+        "status_missing": "No seleccionado",
+        "save_project": "Guardar Proyecto",
+        "open_project": "Abrir Proyecto",
+        "project_name": "Por favor, introduzca un nombre de proyecto",
+
+        "project_saved": "Proyecto guardado correctamente.",
+        "project_load_error": "No se pudo cargar el proyecto.",
+        "invalid_project": "Archivo de proyecto inválido.",
+        "missing_files": "Archivos faltantes",
+        "error": "Error",
+        "success": "Éxito"
     },
 
     "en": {
@@ -46,7 +56,17 @@ LANGUAGES = {
         "export_error": "An error occurred during export.",
 
         "status_selected": "Selected",
-        "status_missing": "Not selected"
+        "status_missing": "Not selected",
+        "save_project": "Save Project",
+        "open_project": "Open Project",
+        "project_name": "Please enter a project name",
+
+        "project_saved": "Project saved successfully.",
+        "project_load_error": "Could not load project.",
+        "invalid_project": "Invalid project file.",
+        "missing_files": "Missing Files",
+        "error": "Error",
+        "success": "Success"
     },
 
     "pt": {
@@ -71,6 +91,16 @@ LANGUAGES = {
         "export_error": "Ocorreu um erro durante a exportação.",
 
         "status_selected": "Selecionado",
-        "status_missing": "Não selecionado"
+        "status_missing": "Não selecionado",
+        "save_project": "Salvar Projeto",
+        "open_project": "Abrir Projeto",
+        "project_name": "Por favor, insira o nome do projeto",
+
+        "project_saved": "Projeto salvo com sucesso.",
+        "project_load_error": "Não foi possível carregar o projeto.",
+        "invalid_project": "Arquivo de projeto inválido.",
+        "missing_files": "Arquivos ausentes",
+        "error": "Erro",
+        "success": "Sucesso"
     }
 }

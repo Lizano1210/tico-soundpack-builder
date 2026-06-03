@@ -14,6 +14,17 @@ from validator import SoundValidator
 from exporter import SoundpackExporter
 from utils import resource_path
 
+from pathlib import Path
+from tkinter import filedialog, messagebox
+
+from audio_preview import AudioPreview
+from project_manager import ProjectManager
+from drag_drop import DragDropManager
+
+from utils import (
+    resource_path,
+    assign_file
+)
 
 class SoundpackBuilderApp(ctk.CTk):
 
@@ -29,8 +40,8 @@ class SoundpackBuilderApp(ctk.CTk):
             self.iconbitmap(resource_path("assets/tsb.ico"))
         else:
             self.iconphoto(True, ImageTk.PhotoImage(Image.open(resource_path("assets/tico_logo.png"))))
-        self.geometry("1000x800")
-        self.resizable(False, False)
+        self.minsize(900, 700)
+        self.resizable(True, True)
         from tkinterdnd2 import TkinterDnD
 
         self.TkdndVersion = TkinterDnD._require(self)
@@ -48,6 +59,10 @@ class SoundpackBuilderApp(ctk.CTk):
         self.formats = self.load_formats()
 
         self.sound_files = {}
+        self.audio_preview = AudioPreview()
+        self.drag_drop = DragDropManager()
+        self.play_buttons = {}
+        self.stop_buttons = {}
         self.select_buttons = {}
         self.file_labels = {}
 
@@ -56,6 +71,15 @@ class SoundpackBuilderApp(ctk.CTk):
         # ==================================================
 
         self.create_widgets()
+        self.protocol("WM_DELETE_WINDOW", self.on_closing)
+    
+    def on_closing(
+        self
+    ):
+
+        self.audio_preview.cleanup()
+
+        self.destroy()
 
     # ==================================================
     # DATOS
@@ -95,6 +119,19 @@ class SoundpackBuilderApp(ctk.CTk):
             text=lang["title"]
         )
 
+        self.open_project_button.configure(
+            text=LANGUAGES[
+                self.current_language
+            ]["open_project"]
+        )
+
+        self.save_project_button.configure(
+            text=LANGUAGES[
+                self.current_language
+            ]["save_project"]
+        )
+
+    
         # ------------------------------
         # Nombre del paquete
         # ------------------------------
@@ -146,6 +183,178 @@ class SoundpackBuilderApp(ctk.CTk):
                 label.configure(
                     text=f"✅ {lang['status_selected']} - {filename}"
                 )
+
+    def handle_drop(
+        self,
+        sound_name,
+        filepath
+    ):
+
+        assign_file(
+            self,
+            sound_name,
+            filepath
+        )
+
+    def play_sound(
+        self,
+        sound_name
+    ):
+
+        filepath = self.sound_files.get(
+            sound_name
+        )
+
+        if not filepath:
+            return
+
+        self.audio_preview.play(
+            filepath
+        )
+
+    def stop_sound(
+        self
+    ):
+
+        self.audio_preview.stop()
+
+    def load_project_files(
+        self,
+        sound_files
+    ):
+
+        for (
+            sound_name,
+            filepath
+        ) in sound_files.items():
+
+            if not filepath:
+                continue
+
+            if not Path(filepath).exists():
+                continue
+
+            assign_file(
+                self,
+                sound_name,
+                filepath
+            )
+
+    def open_project(
+        self
+    ):
+
+        filepath = filedialog.askopenfilename(
+            filetypes=[
+                (
+                    "TSB Project",
+                    "*.tsbp"
+                )
+            ]
+        )
+
+        if not filepath:
+            return
+
+        project = (
+            ProjectManager.load_project(
+                filepath
+            )
+        )
+
+        if project is None:
+
+            messagebox.showerror(
+                LANGUAGES[self.current_language]["error"],
+                LANGUAGES[self.current_language]["project_load_error"]
+            )
+
+            return
+
+        if not ProjectManager.validate_project(
+            project
+        ):
+
+            messagebox.showerror(
+                LANGUAGES[self.current_language]["error"],
+                LANGUAGES[self.current_language]["invalid_project"]
+            )
+
+            return
+
+        self.pack_name_entry.delete(
+            0,
+            "end"
+        )
+
+        self.pack_name_entry.insert(
+            0,
+            project["project_name"]
+        )
+
+        self.load_project_files(
+            project["files"]
+        )
+
+        missing = (
+            ProjectManager.get_missing_files(
+                project["files"]
+            )
+        )
+
+        if missing:
+
+            messagebox.showwarning(
+                LANGUAGES[self.current_language]["missing_files"],
+                "\n".join(missing)
+            )
+
+    def save_project(
+        self
+    ):
+
+        project_name = (
+            self.pack_name_entry
+            .get()
+            .strip()
+        )
+
+        if not project_name:
+
+            messagebox.showerror(
+                LANGUAGES[self.current_language]["error"],
+                LANGUAGES[self.current_language]["project_name"]
+            )
+
+            return
+
+        filepath = filedialog.asksaveasfilename(
+            defaultextension=".tsbp",
+            filetypes=[
+                (
+                    "TSB Project",
+                    "*.tsbp"
+                )
+            ]
+        )
+
+        if not filepath:
+            return
+
+        success = (
+            ProjectManager.save_project(
+                filepath,
+                project_name,
+                self.sound_files
+            )
+        )
+
+        if success:
+
+            messagebox.showinfo(
+                LANGUAGES[self.current_language]["success"],
+                LANGUAGES[self.current_language]["project_saved"]
+            )
     # ==================================================
     # WIDGETS
     # ==================================================
@@ -250,6 +459,26 @@ class SoundpackBuilderApp(ctk.CTk):
 
         self.language_menu.pack()
 
+        self.open_project_button = ctk.CTkButton(
+            right_frame,
+            text=LANGUAGES[self.current_language]["open_project"],
+            command=self.open_project
+        )
+
+        self.open_project_button.pack(
+            pady=5
+        )
+
+        self.save_project_button = ctk.CTkButton(
+            right_frame,
+            text=LANGUAGES[self.current_language]["save_project"],
+            command=self.save_project
+        )
+
+        self.save_project_button.pack(
+            pady=1
+        )
+
     # ==================================================
     # NOMBRE DEL PAQUETE
     # ==================================================
@@ -344,6 +573,31 @@ class SoundpackBuilderApp(ctk.CTk):
                 padx=10
             )
 
+            play_button = ctk.CTkButton(
+                    row,
+                    text="▶",
+                    width=40,
+                    command=lambda s=sound_name:
+                    self.play_sound(s)
+                )
+
+            play_button.pack(
+                side="left",
+                padx=5
+            )
+
+            stop_button = ctk.CTkButton(
+                row,
+                text="■",
+                width=40,
+                command=self.stop_sound
+            )
+
+            stop_button.pack(
+                side="left",
+                padx=5
+            )
+
             # ----------------------------------
             # Estado / archivo
             # ----------------------------------
@@ -361,43 +615,32 @@ class SoundpackBuilderApp(ctk.CTk):
 
             self.select_buttons[sound_name] = select_button
             self.file_labels[sound_name] = file_label
-
+            self.play_buttons[sound_name] = play_button
+            self.stop_buttons[sound_name] = stop_button
+            self.drag_drop.register_target(
+                row,
+                sound_name,
+                self.handle_drop
+            )
     # ==================================================
     # SELECCIÓN DE ARCHIVOS
     # ==================================================
 
-    def select_file(self, sound_name):
-
-        filepath = filedialog.askopenfilename()
-
-        if not filepath:
-            return
-
-        expected_extension = self.formats[sound_name]
-
-        if not SoundValidator.validate_extension(
-            filepath,
-            expected_extension
+    def select_file(
+            self,
+            sound_name
         ):
 
-            messagebox.showerror(
-                LANGUAGES[self.current_language]["validation_error"],
-                LANGUAGES[self.current_language]["invalid_file"]
+            filepath = filedialog.askopenfilename()
+
+            if not filepath:
+                return
+
+            assign_file(
+                self,
+                sound_name,
+                filepath
             )
-
-            return
-
-        self.sound_files[sound_name] = filepath
-
-        filename = Path(filepath).name
-
-        self.file_labels[sound_name].configure(
-            text=f"✅ {LANGUAGES[self.current_language]['status_selected']} - {filename}"
-        )
-
-        self.select_buttons[sound_name].configure(
-            text=LANGUAGES[self.current_language]["change_file"]
-        )
 
     # ==================================================
     # EXPORTAR

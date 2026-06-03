@@ -1,9 +1,0 @@
-{
-    "version": "1.1",
-    "project_name": "Test Project",
-    "files": {
-        "navigation": "navigation.mp3",
-        "home_intro": "home_intro.mp3",
-        "background_music": "background_music.opus"
-    }
-}
