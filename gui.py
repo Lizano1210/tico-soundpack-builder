@@ -31,6 +31,13 @@ class SoundpackBuilderApp(ctk.CTk):
             self.iconphoto(True, ImageTk.PhotoImage(Image.open(resource_path("assets/tico_logo.png"))))
         self.geometry("1000x800")
         self.resizable(False, False)
+        from tkinterdnd2 import TkinterDnD
+
+        self.TkdndVersion = TkinterDnD._require(self)
+
+        print(
+            f"TkDnD cargado: {self.TkdndVersion}"
+        )
 
         # ==================================================
         # ESTADO
