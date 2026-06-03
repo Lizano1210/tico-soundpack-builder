@@ -2,6 +2,9 @@
 
 import json
 import subprocess
+import subprocess
+import sys
+import platform
 
 from ffmpeg_manager import FFmpegManager
 
@@ -13,42 +16,41 @@ class AudioPreview:
     """
 
     def __init__(self):
-
         self.current_process = None
-
         self.ffplay_path = (
             FFmpegManager.get_ffplay_path()
         )
-
         self.ffprobe_path = (
             FFmpegManager.get_ffprobe_path()
         )
         self.current_file = None
+    
 
     def play(self, filepath):
-        """
-        Funcionamiento:
-        Reproduce un archivo de audio.
-
-        Entradas:
-        - filepath (str): Ruta del audio.
-
-        Salidas:
-        - Ninguna.
-        """
-
         self.stop()
-
-        self.current_process = subprocess.Popen(
-            [
-                self.ffplay_path,
-                "-nodisp",
-                "-autoexit",
-                filepath
-            ],
-            stdout=subprocess.DEVNULL,
-            stderr=subprocess.DEVNULL
-        )
+        if platform.system() == "Windows":
+            self.current_process = subprocess.Popen(
+                [
+                    self.ffplay_path, # type: ignore
+                    "-nodisp",
+                    "-autoexit",
+                    filepath
+                ],
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL,
+                creationflags=subprocess.CREATE_NO_WINDOW
+            )
+        else:
+            self.current_process = subprocess.Popen(
+                [
+                    self.ffplay_path, # type: ignore
+                    "-nodisp",
+                    "-autoexit",
+                    filepath
+                ],
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL
+            )
 
         self.current_file = filepath
 
@@ -126,7 +128,7 @@ class AudioPreview:
 
             result = subprocess.run(
                 [
-                    self.ffprobe_path,
+                    self.ffprobe_path, # type: ignore
                     "-v",
                     "quiet",
                     "-print_format",

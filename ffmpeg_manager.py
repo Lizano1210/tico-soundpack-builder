@@ -2,6 +2,10 @@
 
 from pathlib import Path
 import platform
+import sys
+import shutil
+import platform
+from pathlib import Path
 
 
 class FFmpegManager:
@@ -13,46 +17,27 @@ class FFmpegManager:
 
     @staticmethod
     def _get_binary_name(binary_name):
-        """
-        Funcionamiento:
-        Obtiene el nombre correcto del
-        ejecutable según el sistema operativo.
-
-        Entradas:
-        - binary_name (str): Nombre base del ejecutable.
-
-        Salidas:
-        - executable_name (str): Nombre final del ejecutable.
-        """
-
         if platform.system() == "Windows":
             return f"{binary_name}.exe"
-
         return binary_name
 
     @classmethod
     def _get_binary_path(cls, binary_name):
-        """
-        Funcionamiento:
-        Obtiene la ruta absoluta hacia
-        un ejecutable de FFmpeg.
-
-        Entradas:
-        - binary_name (str): ffmpeg, ffplay o ffprobe.
-
-        Salidas:
-        - binary_path (Path): Ruta al ejecutable.
-        """
-
-        executable = cls._get_binary_name(
-            binary_name
-        )
-
-        return (
-            Path(__file__).parent
-            / "ffmpeg"
-            / executable
-        )
+        executable = cls._get_binary_name(binary_name)
+        
+        # Resuelve la base igual que resource_path
+        base = Path(getattr(sys, '_MEIPASS', Path(__file__).parent))
+        bundled = base / "ffmpeg" / executable
+        
+        if bundled.exists():
+            return bundled
+        
+        # Fallback al PATH del sistema
+        system_path = shutil.which(binary_name)
+        if system_path:
+            return Path(system_path)
+        
+        return bundled
 
     @classmethod
     def get_ffmpeg_path(cls):
