@@ -31,7 +31,21 @@ LANGUAGES = {
         "invalid_project": "Archivo de proyecto inválido.",
         "missing_files": "Archivos faltantes",
         "error": "Error",
-        "success": "Éxito"
+        "success": "Éxito",
+
+        "file_menu": "Archivo",
+        "new_project": "Nuevo proyecto",
+        "export_portable": "Exportar proyecto portable",
+        "import_portable": "Importar proyecto portable",
+        "exit": "Salir",
+        "help_menu": "Ayuda",
+        "github": "GitHub",
+        "install_guide": "Cómo instalar un soundpack",
+        "about": "Acerca de",
+        "project_complete": "Proyecto completo",
+        "missing_sounds": "Sonidos faltantes",
+        "portable_export_success": "Proyecto portable exportado correctamente.",
+        "portable_import_success": "Proyecto portable importado correctamente."
     },
 
     "en": {
@@ -66,7 +80,21 @@ LANGUAGES = {
         "invalid_project": "Invalid project file.",
         "missing_files": "Missing Files",
         "error": "Error",
-        "success": "Success"
+        "success": "Success",
+
+        "file_menu": "File",
+        "new_project": "New Project",
+        "export_portable": "Export Portable Project",
+        "import_portable": "Import Portable Project",
+        "exit": "Exit",
+        "help_menu": "Help",
+        "github": "GitHub",
+        "install_guide": "How to Install a Soundpack",
+        "about": "About",
+        "project_complete": "Project Complete",
+        "missing_sounds": "Missing Sounds",
+        "portable_export_success": "Portable project exported successfully.",
+        "portable_import_success": "Portable project imported successfully."
     },
 
     "pt": {
@@ -101,6 +129,20 @@ LANGUAGES = {
         "invalid_project": "Arquivo de projeto inválido.",
         "missing_files": "Arquivos ausentes",
         "error": "Erro",
-        "success": "Sucesso"
+        "success": "Sucesso",
+
+        "file_menu": "Arquivo",
+        "new_project": "Novo projeto",
+        "export_portable": "Exportar projeto portátil",
+        "import_portable": "Importar projeto portátil",
+        "exit": "Sair",
+        "help_menu": "Ajuda",
+        "github": "GitHub",
+        "install_guide": "Como Instalar um Soundpack",
+        "about": "Sobre",
+        "project_complete": "Projeto completo",
+        "missing_sounds": "Sons ausentes",
+        "portable_export_success": "Projeto portátil exportado com sucesso.",
+        "portable_import_success": "Projeto portátil importado com sucesso."
     }
 }

@@ -16,6 +16,7 @@ from utils import resource_path
 
 from pathlib import Path
 from tkinter import filedialog, messagebox
+import tkinter as tk
 
 from audio_preview import AudioPreview
 from project_manager import ProjectManager
@@ -54,7 +55,7 @@ class SoundpackBuilderApp(ctk.CTk):
         # ESTADO
         # ==================================================
 
-        self.current_language = "es"
+        self.current_language = "en"
 
         self.formats = self.load_formats()
 
@@ -65,6 +66,7 @@ class SoundpackBuilderApp(ctk.CTk):
         self.stop_buttons = {}
         self.select_buttons = {}
         self.file_labels = {}
+        self.logo_pil = Image.open(resource_path("assets/tico_logo.png"))
 
         # ==================================================
         # UI
@@ -118,19 +120,6 @@ class SoundpackBuilderApp(ctk.CTk):
         self.title_label.configure(
             text=lang["title"]
         )
-
-        self.open_project_button.configure(
-            text=LANGUAGES[
-                self.current_language
-            ]["open_project"]
-        )
-
-        self.save_project_button.configure(
-            text=LANGUAGES[
-                self.current_language
-            ]["save_project"]
-        )
-
     
         # ------------------------------
         # Nombre del paquete
@@ -183,6 +172,14 @@ class SoundpackBuilderApp(ctk.CTk):
                 label.configure(
                     text=f"✅ {lang['status_selected']} - {filename}"
                 )
+
+        self.file_button.configure(
+            text=lang["file_menu"]
+        )
+
+        self.help_button.configure(
+            text=lang["help_menu"]
+        )
 
     def handle_drop(
         self,
@@ -361,10 +358,181 @@ class SoundpackBuilderApp(ctk.CTk):
 
     def create_widgets(self):
 
+        self.create_top_bar()
         self.create_header()
         self.create_pack_name()
         self.create_sound_rows()
-        self.create_export_button()
+        self.create_footer()
+        """self.header_frame
+        self.pack_name_frame
+        self.sounds_frame
+        self.footer_frame"""
+
+    def create_top_bar(self):
+
+        self.top_bar = ctk.CTkFrame(
+            self,
+            height=40
+        )
+
+        self.top_bar.pack(
+            fill="x",
+            padx=20,
+            pady=(10, 0)
+        )
+
+        self.file_button = ctk.CTkButton(
+            self.top_bar,
+            text=LANGUAGES[self.current_language]["file_menu"],
+            width=80,
+            command=self.show_file_menu
+        )
+
+        self.file_button.pack(
+            side="left",
+            padx=5,
+            pady=5
+        )
+
+        self.help_button = ctk.CTkButton(
+            self.top_bar,
+            text=LANGUAGES[self.current_language]["help_menu"],
+            width=80,
+            command=self.show_help_menu
+        )
+
+        self.help_button.pack(
+            side="left",
+            padx=5,
+            pady=5
+        )
+
+        
+        # ------------------------------
+        # Lado derecho
+        # ------------------------------
+
+
+        self.language_label = ctk.CTkLabel(
+            self.top_bar,
+            text=LANGUAGES[self.current_language]["language"]
+        )
+
+        self.language_label.pack(
+            side="right",
+            pady=(10, 5),
+            padx = 15
+        )
+
+        self.language_menu = ctk.CTkOptionMenu(
+                self.top_bar,
+                values=[
+                    "English",
+                    "Español",
+                    "Português"
+                ],
+                command=self.change_language
+            )
+
+        self.language_menu.pack(
+            side="right",
+            padx=5,
+            pady=5
+        )
+
+        self.small_logo = ctk.CTkImage(
+            light_image=self.logo_pil,
+            dark_image=self.logo_pil,
+            size=(90, 45)
+        )
+
+        self.logo_label = ctk.CTkLabel(
+            self.top_bar,
+            text="",
+            image=self.small_logo
+        )
+
+        self.logo_label.pack(
+            side="right",
+            padx=(0, 10),
+            pady = 5
+        )
+
+    def show_file_menu(self):
+
+        menu = tk.Menu(
+            self,
+            tearoff=0
+        )
+
+        menu.add_command(
+            label=LANGUAGES[self.current_language]["new_project"],
+            command=self.new_project
+        )
+
+        menu.add_command(
+            label=LANGUAGES[self.current_language]["open_project"],
+            command=self.open_project
+        )
+
+        menu.add_command(
+            label=LANGUAGES[self.current_language]["save_project"],
+            command=self.save_project
+        )
+
+        menu.add_separator()
+
+        menu.add_command(
+            label=LANGUAGES[self.current_language]["export_portable"],
+            command=self.export_portable_project
+        )
+
+        menu.add_command(
+            label=LANGUAGES[self.current_language]["import_portable"],
+            command=self.import_portable_project
+        )
+
+        menu.add_separator()
+
+        menu.add_command(
+            label=LANGUAGES[self.current_language]["exit"],
+            command=self.on_closing
+        )
+
+        menu.post(
+            self.file_button.winfo_rootx(),
+            self.file_button.winfo_rooty()
+            + self.file_button.winfo_height()
+        )
+    
+    def show_help_menu(self):
+        menu = tk.Menu(
+            self,
+            tearoff=0
+        )
+
+        menu.add_command(
+            label=LANGUAGES[self.current_language]["github"],
+            command=self.open_github
+        )
+
+        menu.add_command(
+            label=LANGUAGES[self.current_language]["install_guide"],
+            command=self.show_install_guide
+        )
+
+        menu.add_separator()
+
+        menu.add_command(
+            label=LANGUAGES[self.current_language]["about"],
+            command=self.show_about
+        )
+
+        menu.post(
+            self.help_button.winfo_rootx(),
+            self.help_button.winfo_rooty()
+            + self.help_button.winfo_height()
+        )
 
     # ==================================================
     # HEADER
@@ -395,20 +563,6 @@ class SoundpackBuilderApp(ctk.CTk):
             pady=10
         )
 
-        image = Image.open(resource_path("assets/tico_logo.png"))
-
-        logo = ctk.CTkImage(
-            light_image=image,
-            dark_image=image,
-            size=(200, 100)
-        )
-
-        self.logo_label = ctk.CTkLabel(
-            left_frame,
-            image=logo,
-            text=""
-        )
-
         self.logo_label.pack(
             anchor="w"
         )
@@ -421,62 +575,7 @@ class SoundpackBuilderApp(ctk.CTk):
 
         self.title_label.pack(
             anchor="w",
-            pady=(10, 0)
-        )
-
-        # ------------------------------
-        # Lado derecho
-        # ------------------------------
-
-        right_frame = ctk.CTkFrame(
-            header_frame,
-            fg_color="transparent"
-        )
-
-        right_frame.pack(
-            side="right",
-            padx=10
-        )
-
-        self.language_label = ctk.CTkLabel(
-            right_frame,
-            text=LANGUAGES[self.current_language]["language"]
-        )
-
-        self.language_label.pack(
-            pady=(10, 5)
-        )
-
-        self.language_menu = ctk.CTkOptionMenu(
-                right_frame,
-                values=[
-                    "Español",
-                    "English",
-                    "Português"
-                ],
-                command=self.change_language
-            )
-
-        self.language_menu.pack()
-
-        self.open_project_button = ctk.CTkButton(
-            right_frame,
-            text=LANGUAGES[self.current_language]["open_project"],
-            command=self.open_project
-        )
-
-        self.open_project_button.pack(
-            pady=5
-        )
-
-        self.save_project_button = ctk.CTkButton(
-            right_frame,
-            text=LANGUAGES[self.current_language]["save_project"],
-            command=self.save_project
-        )
-
-        self.save_project_button.pack(
-            pady=1
+            pady= 5
         )
 
     # ==================================================
@@ -520,10 +619,11 @@ class SoundpackBuilderApp(ctk.CTk):
 
     def create_sound_rows(self):
 
-        self.sounds_frame = ctk.CTkFrame(self)
+        self.sounds_frame = ctk.CTkScrollableFrame(self)
 
         self.sounds_frame.pack(
-            fill="x",
+            fill="both",
+            expand=True,
             padx=20,
             pady=10
         )
@@ -730,6 +830,27 @@ class SoundpackBuilderApp(ctk.CTk):
                 str(error)
             )
 
+    def create_footer(self):
+        self.footer_frame = ctk.CTkFrame(self)
+
+        self.footer_frame.pack(
+            fill="x",
+            side="bottom",
+            padx=20,
+            pady=10
+        )
+
+        self.export_button = ctk.CTkButton(
+            self.footer_frame,
+            text=LANGUAGES[self.current_language]["create_pack"],
+            height=40,
+            command=self.create_soundpack
+        )
+
+        self.export_button.pack(
+            pady=10
+        )
+
     def create_export_button(self):
 
         self.export_button = ctk.CTkButton(
@@ -742,3 +863,26 @@ class SoundpackBuilderApp(ctk.CTk):
         self.export_button.pack(
             pady=20
         )
+
+    def new_project(self):
+        pass
+
+
+    def export_portable_project(self):
+        pass
+
+
+    def import_portable_project(self):
+        pass
+
+
+    def open_github(self):
+        pass
+
+
+    def show_install_guide(self):
+        pass
+
+
+    def show_about(self):
+        pass
