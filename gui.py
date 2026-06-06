@@ -13,6 +13,7 @@ from language import LANGUAGES
 from validator import SoundValidator
 from exporter import SoundpackExporter
 from utils import resource_path
+import webbrowser
 
 from pathlib import Path
 from tkinter import filedialog, messagebox
@@ -26,6 +27,8 @@ from utils import (
     resource_path,
     assign_file
 )
+
+APP_VERSION = "1.2.0"
 
 class SoundpackBuilderApp(ctk.CTk):
 
@@ -113,9 +116,9 @@ class SoundpackBuilderApp(ctk.CTk):
         # Header
         # ------------------------------
 
-        self.language_label.configure(
+        """self.language_label.configure(
             text=lang["language"]
-        )
+        )"""
 
         self.title_label.configure(
             text=lang["title"]
@@ -413,7 +416,7 @@ class SoundpackBuilderApp(ctk.CTk):
         # ------------------------------
 
 
-        self.language_label = ctk.CTkLabel(
+        """self.language_label = ctk.CTkLabel(
             self.top_bar,
             text=LANGUAGES[self.current_language]["language"]
         )
@@ -422,7 +425,7 @@ class SoundpackBuilderApp(ctk.CTk):
             side="right",
             pady=(10, 5),
             padx = 15
-        )
+        )"""
 
         self.language_menu = ctk.CTkOptionMenu(
                 self.top_bar,
@@ -877,12 +880,115 @@ class SoundpackBuilderApp(ctk.CTk):
 
 
     def open_github(self):
-        pass
+        webbrowser.open(
+        "https://github.com/Lizano1210/tico-soundpack-builder"
+    )
+        
 
 
     def show_install_guide(self):
-        pass
+        guide_window = ctk.CTkToplevel(self)
+
+        guide_window.title(
+            LANGUAGES[self.current_language]["install_guide_title"]
+        )
+
+        guide_window.geometry("650x450")
+
+        guide_window.transient(self)
+
+        guide_window.grab_set()
+
+        content_frame = ctk.CTkFrame(
+            guide_window
+        )
+
+        content_frame.pack(
+            fill="both",
+            expand=True,
+            padx=20,
+            pady=20
+        )
+
+        guide_label = ctk.CTkLabel(
+            content_frame,
+            text=LANGUAGES[self.current_language]["install_guide_text"],
+            justify="left",
+            anchor="nw"
+        )
+
+        guide_label.pack(
+            fill="both",
+            expand=True,
+            padx=10,
+            pady=10
+        )
+
+        logo_label = ctk.CTkLabel(
+            content_frame,
+            text="",
+            image=self.small_logo
+        )
+
+        logo_label.pack(
+            anchor="se",
+            padx=10,
+            pady=10
+        )
 
 
     def show_about(self):
-        pass
+        about_window = ctk.CTkToplevel(self)
+
+        about_window.title(
+            LANGUAGES[self.current_language]["about_title"]
+        )
+
+        about_window.geometry("650x400")
+
+        about_window.transient(self)
+
+        about_window.grab_set()
+
+        content_frame = ctk.CTkFrame(
+            about_window
+        )
+
+        content_frame.pack(
+            fill="both",
+            expand=True,
+            padx=20,
+            pady=20
+        )
+
+        about_text = LANGUAGES[
+            self.current_language
+        ]["about_text"].format(
+            version=APP_VERSION
+        )
+
+        about_label = ctk.CTkLabel(
+            content_frame,
+            text=about_text,
+            justify="left",
+            anchor="nw"
+        )
+
+        about_label.pack(
+            fill="both",
+            expand=True,
+            padx=10,
+            pady=10
+        )
+
+        logo_label = ctk.CTkLabel(
+            content_frame,
+            text="",
+            image=self.small_logo
+        )
+
+        logo_label.pack(
+            anchor="se",
+            padx=10,
+            pady=10
+        )
