@@ -1,2 +1,4 @@
 build/TSB-Windows/TSB-Windows.pkg
 /dist
+/build
+TSB-Linux-NoFFmpeg.spec
