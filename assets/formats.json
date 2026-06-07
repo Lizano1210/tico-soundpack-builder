@@ -9,5 +9,6 @@
     "home_intro": "mp3",
     "click": "mp3",
     "quick_menu": "mp3",
-    "background_music": "opus"
+    "background_music": {"format": "opus",
+    "folders": true} 
 }

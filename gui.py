@@ -881,7 +881,7 @@ class SoundpackBuilderApp(ctk.CTk):
 
     def open_github(self):
         webbrowser.open(
-        "https://github.com/Lizano1210/tico-soundpack-builder"
+        "|https://github.com/Lizano1210/tico-soundpack-builder"
     )
         
 
