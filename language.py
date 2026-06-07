@@ -78,7 +78,28 @@ LANGUAGES = {
 
         Si disfrutas esta herramienta, no dudes en compartir tus creaciones con otros usuarios. 
         Gracias al trabajo y las contribuciones de la comunidad, podemos seguir convirtiendo TICO en 
-        un hogar para incontables jugadores alrededor del mundo."""
+        un hogar para incontables jugadores alrededor del mundo.""",
+
+        "manage_songs": "Administrar canciones",
+        "additional_songs": "Canciones adicionales",
+        "add_song": "Agregar canción",
+        "remove_song": "Eliminar",
+        "rename_song": "Renombrar",
+        "song_name": "Nombre de la canción",
+        "default_song": "Canción predeterminada",
+        "extra_songs": "Canciones extra",
+        "no_additional_songs": "No se han agregado canciones adicionales.",
+        "select_song": "Seleccionar canción",
+        "edit_song_name": "Editar nombre de la canción",
+        "song_manager_title": "Canciones adicionales",
+        "song_added": "Canción agregada correctamente.",
+        "song_removed": "Canción eliminada correctamente.",
+        "song_renamed": "Canción renombrada correctamente.",
+        "invalid_song_name": "Ingrese un nombre de canción válido.",
+        "duplicate_song_name": "Ya existe una canción con ese nombre.",
+        "additional_song_count": "Canciones adicionales: {count}",
+        "main_song": "Canción principal",
+        "folders_enabled": "Admite canciones adicionales"
     },
 
     "en": {
@@ -161,7 +182,28 @@ LANGUAGES = {
 
         If you enjoy this tool, don't hesitate to share your creations with other users. Through the work and 
         contributions of the community, we can continue making TICO a home for 
-        countless players around the world."""
+        countless players around the world.""",
+
+        "manage_songs": "Manage Songs",
+        "additional_songs": "Additional Songs",
+        "add_song": "Add Song",
+        "remove_song": "Remove",
+        "rename_song": "Rename",
+        "song_name": "Song Name",
+        "default_song": "Default Song",
+        "extra_songs": "Extra Songs",
+        "no_additional_songs": "No additional songs added.",
+        "select_song": "Select Song",
+        "edit_song_name": "Edit Song Name",
+        "song_manager_title": "Additional Songs",
+        "song_added": "Song added successfully.",
+        "song_removed": "Song removed successfully.",
+        "song_renamed": "Song renamed successfully.",
+        "invalid_song_name": "Please enter a valid song name.",
+        "duplicate_song_name": "A song with this name already exists.",
+        "additional_song_count": "Additional songs: {count}",
+        "main_song": "Main Song",
+        "folders_enabled": "Supports additional songs"
     },
 
     "pt": {
@@ -244,6 +286,27 @@ LANGUAGES = {
 
         Se você gosta desta ferramenta, sinta-se à vontade para compartilhar suas criações com outros 
         usuários. Graças ao trabalho e às contribuições da comunidade, podemos continuar tornando o 
-        TICO um lar para inúmeros jogadores ao redor do mundo."""
+        TICO um lar para inúmeros jogadores ao redor do mundo.""",
+
+        "manage_songs": "Gerenciar músicas",
+        "additional_songs": "Músicas adicionais",
+        "add_song": "Adicionar música",
+        "remove_song": "Remover",
+        "rename_song": "Renomear",
+        "song_name": "Nome da música",
+        "default_song": "Música padrão",
+        "extra_songs": "Músicas extras",
+        "no_additional_songs": "Nenhuma música adicional foi adicionada.",
+        "select_song": "Selecionar música",
+        "edit_song_name": "Editar nome da música",
+        "song_manager_title": "Músicas adicionais",
+        "song_added": "Música adicionada com sucesso.",
+        "song_removed": "Música removida com sucesso.",
+        "song_renamed": "Música renomeada com sucesso.",
+        "invalid_song_name": "Digite um nome de música válido.",
+        "duplicate_song_name": "Já existe uma música com esse nome.",
+        "additional_song_count": "Músicas adicionais: {count}",
+        "main_song": "Música principal",
+        "folders_enabled": "Suporta músicas adicionais"
     }
 }
