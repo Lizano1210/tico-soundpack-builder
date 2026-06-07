@@ -3,6 +3,7 @@ from pathlib import Path
 import shutil
 from pathlib import Path
 import shutil
+from ffmpeg_manager import FFmpegManager
 
 
 class SoundpackExporter:
@@ -44,17 +45,29 @@ class SoundpackExporter:
         for sound_name, value in sound_files.items():
 
             fmt = formats[sound_name]
-            has_folders = isinstance(fmt, dict) and fmt.get("folders")
+
+            if isinstance(fmt, dict):
+                target_format = fmt["format"]
+                has_folders = fmt.get("folders", False)
+            else:
+                target_format = fmt
+                has_folders = False
 
             if has_folders and isinstance(value, dict):
 
                 main = value.get("main")
 
                 if main:
-                    extension = Path(main).suffix
-                    shutil.copy2(
+
+                    output_path = (
+                        soundpack_path
+                        / f"{sound_name}.{target_format}"
+                    )
+
+                    FFmpegManager.prepare_audio_for_export(
                         main,
-                        soundpack_path / f"{sound_name}{extension}"
+                        target_format,
+                        output_path
                     )
 
                 for extra in value.get("extras", []):
@@ -69,13 +82,20 @@ class SoundpackExporter:
                         soundpack_path / "songs" / name
                     )
 
-                    extra_folder.mkdir(parents=True, exist_ok=True)
+                    extra_folder.mkdir(
+                        parents=True,
+                        exist_ok=True
+                    )
 
-                    extension = Path(path).suffix
+                    output_path = (
+                        extra_folder
+                        / f"{sound_name}.{target_format}"
+                    )
 
-                    shutil.copy2(
+                    FFmpegManager.prepare_audio_for_export(
                         path,
-                        extra_folder / f"{sound_name}{extension}"
+                        target_format,
+                        output_path
                     )
 
             else:
@@ -83,11 +103,15 @@ class SoundpackExporter:
                 if not value:
                     continue
 
-                extension = Path(value).suffix
+                output_path = (
+                    soundpack_path
+                    / f"{sound_name}.{target_format}"
+                )
 
-                shutil.copy2(
+                FFmpegManager.prepare_audio_for_export(
                     value,
-                    soundpack_path / f"{sound_name}{extension}"
+                    target_format,
+                    output_path
                 )
 
         return soundpack_path

@@ -5,6 +5,7 @@ import platform
 import sys
 import shutil
 import platform
+import subprocess
 from pathlib import Path
 
 
@@ -162,3 +163,51 @@ class FFmpegManager:
                 cls.ffprobe_exists()
             ]
         )
+    
+    @classmethod
+    def prepare_audio_for_export(
+        cls,
+        source_path,
+        target_format,
+        output_path
+    ):
+        """
+        Copia o convierte un archivo de audio
+        al formato requerido para exportación.
+
+        Entradas:
+        - source_path (str | Path)
+        - target_format (str): formato destino sin punto, ej: "mp3"
+        - output_path (str | Path): ruta completa del archivo destino
+
+        Salidas:
+        - output_path (Path)
+        """
+
+        source_path = Path(source_path)
+        output_path = Path(output_path)
+        source_ext = source_path.suffix.lstrip(".").lower()
+
+        if source_ext == target_format.lower():
+
+            shutil.copy2(source_path, output_path)
+
+            return output_path
+
+        result = subprocess.run(
+            [
+                cls.get_ffmpeg_path(),
+                "-y",
+                "-i", str(source_path),
+                str(output_path)
+            ],
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL
+        )
+
+        if result.returncode != 0:
+            raise RuntimeError(
+                f"FFmpeg failed converting {source_path.name} to {target_format}"
+            )
+
+        return output_path

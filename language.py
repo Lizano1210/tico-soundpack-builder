@@ -109,7 +109,12 @@ LANGUAGES = {
         "portable_project_error": "No se pudo importar el proyecto portátil. El archivo puede estar corrupto o falta project.json.",
         "save_imported_project": "Guardar Proyecto Importado",
         "portable_saved_location": "Proyecto guardado en: {path}",
-        "portable_project_loaded": "Este es un proyecto portátil. Selecciona una carpeta para guardar los archivos del proyecto localmente."
+        "portable_project_loaded": "Este es un proyecto portátil. Selecciona una carpeta para guardar los archivos del proyecto localmente.",
+        "conversion_error": "Error de Conversión",
+        "unsupported_audio_file": "Archivo de audio no compatible. Selecciona un archivo válido (.mp3, .wav, .flac, .ogg, .opus, .m4a).",
+        "audio_conversion_failed": "No se pudo convertir uno o más archivos. Asegúrate de que FFmpeg esté disponible.",
+        "ffmpeg_not_found": "FFmpeg no encontrado. Instala FFmpeg o usa la versión incluida.",
+        "conversion_complete": "Soundpack creado correctamente.",
     },
 
     "en": {
@@ -223,7 +228,13 @@ LANGUAGES = {
         "portable_project_error": "Could not import the portable project. The file may be corrupt or missing project.json.",
         "save_imported_project": "Save Imported Project",
         "portable_saved_location": "Project saved to: {path}",
-        "portable_project_loaded": "This is a portable project. Please select a folder to save the project files locally."
+        "portable_project_loaded": "This is a portable project. Please select a folder to save the project files locally.",
+
+        "conversion_error": "Conversion Error",
+        "unsupported_audio_file": "Unsupported audio file. Please select a valid audio file (.mp3, .wav, .flac, .ogg, .opus, .m4a).",
+        "audio_conversion_failed": "Failed to convert one or more audio files. Make sure FFmpeg is available.",
+        "ffmpeg_not_found": "FFmpeg not found. Please install FFmpeg or use the bundled version.",
+        "conversion_complete": "Soundpack created successfully.",
     },
 
     "pt": {
@@ -337,7 +348,12 @@ LANGUAGES = {
         "portable_project_error": "Não foi possível importar o projeto portátil. O arquivo pode estar corrompido ou falta o project.json.",
         "save_imported_project": "Salvar Projeto Importado",
         "portable_saved_location": "Projeto salvo em: {path}",
-        "portable_project_loaded": "Este é um projeto portátil. Selecione uma pasta para salvar os arquivos do projeto localmente."
+        "portable_project_loaded": "Este é um projeto portátil. Selecione uma pasta para salvar os arquivos do projeto localmente.",
+        "conversion_error": "Erro de Conversão",
+        "unsupported_audio_file": "Arquivo de áudio não compatível. Selecione um arquivo válido (.mp3, .wav, .flac, .ogg, .opus, .m4a).",
+        "audio_conversion_failed": "Falha ao converter um ou mais arquivos. Verifique se o FFmpeg está disponível.",
+        "ffmpeg_not_found": "FFmpeg não encontrado. Instale o FFmpeg ou use a versão incluída.",
+        "conversion_complete": "Soundpack criado com sucesso.",
     
     }
 }

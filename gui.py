@@ -10,6 +10,7 @@ import customtkinter as ctk
 from PIL import Image
 
 from language import LANGUAGES
+from ffmpeg_manager import FFmpegManager
 from validator import SoundValidator
 from exporter import SoundpackExporter
 from utils import resource_path
@@ -1161,21 +1162,41 @@ class SoundpackBuilderApp(ctk.CTk):
         # Validar archivos
         # ----------------------------------
 
-        missing_sounds = []
+        invalid_sounds = []
 
         for sound_name in self.sound_files:
 
             main_path = self._get_main_path(sound_name)
 
             if main_path is None:
+                invalid_sounds.append(sound_name)
+                continue
 
-                missing_sounds.append(sound_name)
+            if not Path(main_path).exists():
+                invalid_sounds.append(sound_name)
+                continue
 
-        if missing_sounds:
+            if not SoundValidator.is_supported_audio(main_path):
+                invalid_sounds.append(sound_name)
+
+        if invalid_sounds:
 
             messagebox.showerror(
                 LANGUAGES[self.current_language]["validation_error"],
                 LANGUAGES[self.current_language]["missing_files"]
+            )
+
+            return
+
+        # ----------------------------------
+        # Verificar FFmpeg
+        # ----------------------------------
+
+        if not FFmpegManager.ffmpeg_exists():
+
+            messagebox.showerror(
+                LANGUAGES[self.current_language]["conversion_error"],
+                LANGUAGES[self.current_language]["ffmpeg_not_found"]
             )
 
             return
@@ -1189,7 +1210,6 @@ class SoundpackBuilderApp(ctk.CTk):
         )
 
         if not destination_folder:
-
             return
 
         # ----------------------------------
@@ -1219,8 +1239,9 @@ class SoundpackBuilderApp(ctk.CTk):
         except Exception as error:
 
             messagebox.showerror(
-                LANGUAGES[self.current_language]["export_error"],
-                str(error)
+                LANGUAGES[self.current_language]["conversion_error"],
+                LANGUAGES[self.current_language]["audio_conversion_failed"]
+                + f"\n\n{error}"
             )
 
     # ==================================================
