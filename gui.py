@@ -1275,7 +1275,48 @@ class SoundpackBuilderApp(ctk.CTk):
     # ==================================================
 
     def new_project(self):
-        pass
+        lang = LANGUAGES[self.current_language]
+
+        # Preguntar si guardar antes de limpiar
+        answer = messagebox.askyesnocancel(
+            lang["new_project"],
+            lang["new_project_confirm"]
+        )
+
+        # Cancelar — no hacer nada
+        if answer is None:
+            return
+
+        # Sí — guardar primero
+        if answer:
+            self.save_project()
+
+        # Limpiar estado
+        self._cleanup_portable_tmp()
+        self.is_portable_project = False
+
+        self.pack_name_entry.delete(0, "end")
+
+        for sound_name in self.sound_files:
+
+            if self._has_folders(sound_name):
+
+                self.sound_files[sound_name] = {
+                    "main": None,
+                    "extras": []
+                }
+
+            else:
+
+                self.sound_files[sound_name] = None
+
+            self.file_labels[sound_name].configure(
+                text=f"❌ {lang['status_missing']}"
+            )
+
+            self.select_buttons[sound_name].configure(
+                text=lang["select_file"]
+            )
 
     def export_portable_project(self):
 

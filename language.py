@@ -115,6 +115,7 @@ LANGUAGES = {
         "audio_conversion_failed": "No se pudo convertir uno o más archivos. Asegúrate de que FFmpeg esté disponible.",
         "ffmpeg_not_found": "FFmpeg no encontrado. Instala FFmpeg o usa la versión incluida.",
         "conversion_complete": "Soundpack creado correctamente.",
+        "new_project_confirm": "¿Deseas guardar el proyecto actual antes de crear uno nuevo?",  
     },
 
     "en": {
@@ -235,6 +236,7 @@ LANGUAGES = {
         "audio_conversion_failed": "Failed to convert one or more audio files. Make sure FFmpeg is available.",
         "ffmpeg_not_found": "FFmpeg not found. Please install FFmpeg or use the bundled version.",
         "conversion_complete": "Soundpack created successfully.",
+        "new_project_confirm": "Do you want to save the current project before creating a new one?",
     },
 
     "pt": {
@@ -354,6 +356,7 @@ LANGUAGES = {
         "audio_conversion_failed": "Falha ao converter um ou mais arquivos. Verifique se o FFmpeg está disponível.",
         "ffmpeg_not_found": "FFmpeg não encontrado. Instale o FFmpeg ou use a versão incluída.",
         "conversion_complete": "Soundpack criado com sucesso.",
+        "new_project_confirm": "Deseja salvar o projeto atual antes de criar um novo?",
     
     }
 }
