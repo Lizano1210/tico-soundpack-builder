@@ -13,49 +13,24 @@ def get_current_file(self):
     return self.current_file
 
 def assign_file(
-    app,
-    sound_name,
-    filepath
-):
-    """
-    Funcionamiento:
-    Asigna un archivo a un sonido,
-    actualizando tanto los datos
-    internos como la interfaz.
+        app,
+        sound_name,
+        filepath
+    ):
+        resource = app.sound_files[sound_name]
 
-    Entradas:
-    - app (SoundpackBuilderApp):
-      Instancia principal de la aplicación.
-    - sound_name (str):
-      Nombre del sonido.
-    - filepath (str):
-      Ruta del archivo seleccionado.
+        if isinstance(resource, dict):
+            app.sound_files[sound_name]["main"] = filepath
+        else:
+            app.sound_files[sound_name] = filepath
 
-    Salidas:
-    - Ninguna.
-    """
+        filename = Path(filepath).name
 
-    app.sound_files[
-        sound_name
-    ] = filepath
+        app.file_labels[sound_name].configure(
+            text=f"✅ {filename}"
+        )
 
-    filename = (
-        Path(filepath)
-        .name
-    )
+        app.select_buttons[sound_name].configure(
+            text=LANGUAGES[app.current_language]["change_file"]
+        )
 
-    app.file_labels[
-        sound_name
-    ].configure(
-        text=f"✅ {filename}"
-    )
-
-    app.select_buttons[
-        sound_name
-    ].configure(
-        text=LANGUAGES[
-            app.current_language
-        ][
-            "change_file"
-        ]
-    )

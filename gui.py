@@ -4,7 +4,7 @@ from PIL import Image, ImageTk
 import sys
 import json
 from pathlib import Path
-from tkinter import filedialog, messagebox
+from tkinter import filedialog, messagebox, simpledialog
 
 import customtkinter as ctk
 from PIL import Image
@@ -13,6 +13,7 @@ from language import LANGUAGES
 from validator import SoundValidator
 from exporter import SoundpackExporter
 from utils import resource_path
+from portable_project import PortableProjectManager
 import webbrowser
 
 from pathlib import Path
@@ -69,6 +70,7 @@ class SoundpackBuilderApp(ctk.CTk):
         self.stop_buttons = {}
         self.select_buttons = {}
         self.file_labels = {}
+        self.manage_buttons = {}
         self.logo_pil = Image.open(resource_path("assets/tico_logo.png"))
 
         # ==================================================
@@ -77,14 +79,63 @@ class SoundpackBuilderApp(ctk.CTk):
 
         self.create_widgets()
         self.protocol("WM_DELETE_WINDOW", self.on_closing)
-    
-    def on_closing(
-        self
-    ):
+        self.is_portable_project = False
+        self._portable_tmp_dir = None
+
+    def on_closing(self):
+
+        self.audio_preview.cleanup()
+        self._cleanup_portable_tmp()
+        self.destroy()
 
         self.audio_preview.cleanup()
 
         self.destroy()
+
+    # ==================================================
+    # HELPERS
+    # ==================================================
+
+    def _has_folders(self, sound_name):
+        """
+        Retorna True si el recurso soporta
+        canciones adicionales según formats.json.
+        """
+
+        fmt = self.formats.get(sound_name)
+
+        return (
+            isinstance(fmt, dict)
+            and fmt.get("folders", False)
+        )
+
+    def _get_main_path(self, sound_name):
+        """
+        Retorna la ruta principal de un recurso,
+        independientemente de si es dict o str.
+        """
+
+        value = self.sound_files.get(sound_name)
+
+        if isinstance(value, dict):
+            return value.get("main")
+
+        return value
+    
+    def _cleanup_portable_tmp(self):
+
+        if self._portable_tmp_dir:
+
+            import shutil
+
+            shutil.rmtree(
+                self._portable_tmp_dir,
+                ignore_errors=True
+            )
+
+            self._portable_tmp_dir = None
+
+    
 
     # ==================================================
     # DATOS
@@ -116,14 +167,10 @@ class SoundpackBuilderApp(ctk.CTk):
         # Header
         # ------------------------------
 
-        """self.language_label.configure(
-            text=lang["language"]
-        )"""
-
         self.title_label.configure(
             text=lang["title"]
         )
-    
+
         # ------------------------------
         # Nombre del paquete
         # ------------------------------
@@ -146,7 +193,9 @@ class SoundpackBuilderApp(ctk.CTk):
 
         for sound_name, button in self.select_buttons.items():
 
-            if self.sound_files[sound_name] is None:
+            main_path = self._get_main_path(sound_name)
+
+            if main_path is None:
 
                 button.configure(
                     text=lang["select_file"]
@@ -160,9 +209,9 @@ class SoundpackBuilderApp(ctk.CTk):
 
         for sound_name, label in self.file_labels.items():
 
-            filepath = self.sound_files[sound_name]
+            main_path = self._get_main_path(sound_name)
 
-            if filepath is None:
+            if main_path is None:
 
                 label.configure(
                     text=f"❌ {lang['status_missing']}"
@@ -170,11 +219,25 @@ class SoundpackBuilderApp(ctk.CTk):
 
             else:
 
-                filename = Path(filepath).name
+                filename = Path(main_path).name
 
                 label.configure(
                     text=f"✅ {lang['status_selected']} - {filename}"
                 )
+
+        # ------------------------------
+        # Botones Manage Songs
+        # ------------------------------
+
+        for sound_name, button in self.manage_buttons.items():
+
+            button.configure(
+                text=lang["manage_songs"]
+            )
+
+        # ------------------------------
+        # Menús
+        # ------------------------------
 
         self.file_button.configure(
             text=lang["file_menu"]
@@ -201,15 +264,13 @@ class SoundpackBuilderApp(ctk.CTk):
         sound_name
     ):
 
-        filepath = self.sound_files.get(
-            sound_name
-        )
+        main_path = self._get_main_path(sound_name)
 
-        if not filepath:
+        if not main_path:
             return
 
         self.audio_preview.play(
-            filepath
+            main_path
         )
 
     def stop_sound(
@@ -223,22 +284,42 @@ class SoundpackBuilderApp(ctk.CTk):
         sound_files
     ):
 
-        for (
-            sound_name,
-            filepath
-        ) in sound_files.items():
+        for sound_name, value in sound_files.items():
 
-            if not filepath:
+            if not value:
                 continue
 
-            if not Path(filepath).exists():
-                continue
+            if isinstance(value, dict):
 
-            assign_file(
-                self,
-                sound_name,
-                filepath
-            )
+                main = value.get("main")
+
+                if main and Path(main).exists():
+
+                    assign_file(
+                        self,
+                        sound_name,
+                        main
+                    )
+
+                extras = value.get("extras", [])
+
+                if extras and self._has_folders(sound_name):
+
+                    self.sound_files[sound_name]["extras"] = [
+                        extra for extra in extras
+                        if Path(extra.get("path", "")).exists()
+                    ]
+
+            else:
+
+                if not Path(value).exists():
+                    continue
+
+                assign_file(
+                    self,
+                    sound_name,
+                    value
+                )
 
     def open_project(
         self
@@ -271,7 +352,7 @@ class SoundpackBuilderApp(ctk.CTk):
 
             return
 
-        if not ProjectManager.validate_project(
+        if not ProjectManager.validate_files(
             project
         ):
 
@@ -328,6 +409,82 @@ class SoundpackBuilderApp(ctk.CTk):
 
             return
 
+        # ----------------------------------
+        # Caso especial: proyecto portable
+        # ----------------------------------
+
+        if self.is_portable_project:
+
+            messagebox.showinfo(
+                LANGUAGES[self.current_language]["save_imported_project"],
+                LANGUAGES[self.current_language]["portable_project_loaded"]
+            )
+
+            destination_folder = filedialog.askdirectory()
+
+            if not destination_folder:
+                return
+
+            local_files, project_folder = (
+                PortableProjectManager.save_as_local(
+                    destination_folder,
+                    project_name,
+                    self.sound_files
+                )
+            )
+
+            # Limpiar temp y desactivar flag ANTES de actualizar
+            self._cleanup_portable_tmp()
+            self.is_portable_project = False
+
+            # Actualizar sound_files directamente con las rutas locales
+            for sound_name, value in local_files.items():
+
+                if sound_name not in self.sound_files:
+                    continue
+
+                if isinstance(value, dict):
+
+                    self.sound_files[sound_name] = {
+                        "main": value.get("main"),
+                        "extras": value.get("extras", [])
+                    }
+
+                    main = value.get("main")
+
+                    if main:
+                        assign_file(self, sound_name, main)
+
+                else:
+
+                    self.sound_files[sound_name] = value
+
+                    if value:
+                        assign_file(self, sound_name, value)
+
+            tsbp_path = project_folder / f"{project_name}.tsbp"
+
+            success = ProjectManager.save_project(
+                str(tsbp_path),
+                project_name,
+                self.sound_files
+            )
+
+            if success:
+
+                messagebox.showinfo(
+                    LANGUAGES[self.current_language]["success"],
+                    LANGUAGES[self.current_language]["portable_saved_location"].format(
+                        path=project_folder
+                    )
+                )
+
+            return
+
+        # ----------------------------------
+        # Flujo normal
+        # ----------------------------------
+
         filepath = filedialog.asksaveasfilename(
             defaultextension=".tsbp",
             filetypes=[
@@ -341,12 +498,10 @@ class SoundpackBuilderApp(ctk.CTk):
         if not filepath:
             return
 
-        success = (
-            ProjectManager.save_project(
-                filepath,
-                project_name,
-                self.sound_files
-            )
+        success = ProjectManager.save_project(
+            filepath,
+            project_name,
+            self.sound_files
         )
 
         if success:
@@ -355,6 +510,7 @@ class SoundpackBuilderApp(ctk.CTk):
                 LANGUAGES[self.current_language]["success"],
                 LANGUAGES[self.current_language]["project_saved"]
             )
+
     # ==================================================
     # WIDGETS
     # ==================================================
@@ -366,10 +522,6 @@ class SoundpackBuilderApp(ctk.CTk):
         self.create_pack_name()
         self.create_sound_rows()
         self.create_footer()
-        """self.header_frame
-        self.pack_name_frame
-        self.sounds_frame
-        self.footer_frame"""
 
     def create_top_bar(self):
 
@@ -410,32 +562,15 @@ class SoundpackBuilderApp(ctk.CTk):
             pady=5
         )
 
-        
-        # ------------------------------
-        # Lado derecho
-        # ------------------------------
-
-
-        """self.language_label = ctk.CTkLabel(
-            self.top_bar,
-            text=LANGUAGES[self.current_language]["language"]
-        )
-
-        self.language_label.pack(
-            side="right",
-            pady=(10, 5),
-            padx = 15
-        )"""
-
         self.language_menu = ctk.CTkOptionMenu(
-                self.top_bar,
-                values=[
-                    "English",
-                    "Español",
-                    "Português"
-                ],
-                command=self.change_language
-            )
+            self.top_bar,
+            values=[
+                "English",
+                "Español",
+                "Português"
+            ],
+            command=self.change_language
+        )
 
         self.language_menu.pack(
             side="right",
@@ -458,7 +593,7 @@ class SoundpackBuilderApp(ctk.CTk):
         self.logo_label.pack(
             side="right",
             padx=(0, 10),
-            pady = 5
+            pady=5
         )
 
     def show_file_menu(self):
@@ -507,8 +642,9 @@ class SoundpackBuilderApp(ctk.CTk):
             self.file_button.winfo_rooty()
             + self.file_button.winfo_height()
         )
-    
+
     def show_help_menu(self):
+
         menu = tk.Menu(
             self,
             tearoff=0
@@ -551,10 +687,6 @@ class SoundpackBuilderApp(ctk.CTk):
             pady=20
         )
 
-        # ------------------------------
-        # Lado izquierdo
-        # ------------------------------
-
         left_frame = ctk.CTkFrame(
             header_frame,
             fg_color="transparent"
@@ -578,7 +710,7 @@ class SoundpackBuilderApp(ctk.CTk):
 
         self.title_label.pack(
             anchor="w",
-            pady= 5
+            pady=5
         )
 
     # ==================================================
@@ -631,9 +763,24 @@ class SoundpackBuilderApp(ctk.CTk):
             pady=10
         )
 
-        for sound_name in self.formats:
+        for sound_name, fmt in self.formats.items():
 
-            self.sound_files[sound_name] = None
+            has_folders = (
+                isinstance(fmt, dict)
+                and fmt.get("folders", False)
+            )
+
+            # Inicializar estructura según tipo
+            if has_folders:
+
+                self.sound_files[sound_name] = {
+                    "main": None,
+                    "extras": []
+                }
+
+            else:
+
+                self.sound_files[sound_name] = None
 
             row = ctk.CTkFrame(self.sounds_frame)
 
@@ -660,7 +807,7 @@ class SoundpackBuilderApp(ctk.CTk):
             )
 
             # ----------------------------------
-            # Botón
+            # Botón seleccionar
             # ----------------------------------
 
             select_button = ctk.CTkButton(
@@ -676,13 +823,17 @@ class SoundpackBuilderApp(ctk.CTk):
                 padx=10
             )
 
+            # ----------------------------------
+            # Botones play / stop
+            # ----------------------------------
+
             play_button = ctk.CTkButton(
-                    row,
-                    text="▶",
-                    width=40,
-                    command=lambda s=sound_name:
-                    self.play_sound(s)
-                )
+                row,
+                text="▶",
+                width=40,
+                command=lambda s=sound_name:
+                self.play_sound(s)
+            )
 
             play_button.pack(
                 side="left",
@@ -700,6 +851,27 @@ class SoundpackBuilderApp(ctk.CTk):
                 side="left",
                 padx=5
             )
+
+            # ----------------------------------
+            # Botón Manage Songs (solo si folders)
+            # ----------------------------------
+
+            if has_folders:
+
+                manage_button = ctk.CTkButton(
+                    row,
+                    text=LANGUAGES[self.current_language]["manage_songs"],
+                    width=140,
+                    command=lambda name=sound_name:
+                    self.open_song_manager(name)
+                )
+
+                manage_button.pack(
+                    side="left",
+                    padx=10
+                )
+
+                self.manage_buttons[sound_name] = manage_button
 
             # ----------------------------------
             # Estado / archivo
@@ -720,30 +892,247 @@ class SoundpackBuilderApp(ctk.CTk):
             self.file_labels[sound_name] = file_label
             self.play_buttons[sound_name] = play_button
             self.stop_buttons[sound_name] = stop_button
+
             self.drag_drop.register_target(
                 row,
                 sound_name,
                 self.handle_drop
             )
+
     # ==================================================
     # SELECCIÓN DE ARCHIVOS
     # ==================================================
 
     def select_file(
+        self,
+        sound_name
+    ):
+
+        filepath = filedialog.askopenfilename()
+
+        if not filepath:
+            return
+
+        assign_file(
             self,
-            sound_name
-        ):
+            sound_name,
+            filepath
+        )
 
-            filepath = filedialog.askopenfilename()
+    # ==================================================
+    # SONG MANAGER
+    # ==================================================
 
-            if not filepath:
+    def open_song_manager(
+        self,
+        sound_name
+    ):
+
+        lang = LANGUAGES[self.current_language]
+
+        manager_window = ctk.CTkToplevel(self)
+
+        manager_window.title(
+            f"{lang['manage_songs']} — {sound_name}"
+        )
+
+        manager_window.geometry("600x450")
+
+        manager_window.transient(self)
+
+        manager_window.grab_set()
+
+        # ----------------------------------
+        # Lista de canciones
+        # ----------------------------------
+
+        list_frame = ctk.CTkScrollableFrame(
+            manager_window
+        )
+
+        list_frame.pack(
+            fill="both",
+            expand=True,
+            padx=20,
+            pady=(20, 10)
+        )
+
+        def refresh_list():
+
+            for widget in list_frame.winfo_children():
+                widget.destroy()
+
+            extras = self.sound_files[sound_name].get(
+                "extras",
+                []
+            )
+
+            if not extras:
+
+                ctk.CTkLabel(
+                    list_frame,
+                    text=lang["no_additional_songs"],
+                    anchor="w"
+                ).pack(
+                    fill="x",
+                    padx=10,
+                    pady=10
+                )
+
                 return
 
-            assign_file(
-                self,
-                sound_name,
-                filepath
+            for index, extra in enumerate(extras):
+
+                song_row = ctk.CTkFrame(list_frame)
+
+                song_row.pack(
+                    fill="x",
+                    pady=3,
+                    padx=5
+                )
+
+                ctk.CTkLabel(
+                    song_row,
+                    text=extra.get("name", ""),
+                    anchor="w",
+                    width=250
+                ).pack(
+                    side="left",
+                    padx=10
+                )
+
+                ctk.CTkLabel(
+                    song_row,
+                    text=Path(
+                        extra.get("path", "")
+                    ).name,
+                    anchor="w",
+                    text_color="gray"
+                ).pack(
+                    side="left",
+                    padx=5
+                )
+
+                ctk.CTkButton(
+                    song_row,
+                    text="✏️",
+                    width=36,
+                    command=lambda i=index: (
+                        self.rename_extra_song(
+                            sound_name,
+                            i
+                        ),
+                        refresh_list()
+                    )
+                ).pack(
+                    side="right",
+                    padx=5
+                )
+
+                ctk.CTkButton(
+                    song_row,
+                    text="🗑️",
+                    width=36,
+                    command=lambda i=index: (
+                        self.remove_extra_song(
+                            sound_name,
+                            i
+                        ),
+                        refresh_list()
+                    )
+                ).pack(
+                    side="right",
+                    padx=5
+                )
+
+        refresh_list()
+
+        # ----------------------------------
+        # Botón añadir
+        # ----------------------------------
+
+        button_frame = ctk.CTkFrame(
+            manager_window,
+            fg_color="transparent"
+        )
+
+        button_frame.pack(
+            fill="x",
+            padx=20,
+            pady=(0, 20)
+        )
+
+        ctk.CTkButton(
+            button_frame,
+            text=lang["add_song"],
+            command=lambda: (
+                self.add_extra_song(sound_name),
+                refresh_list()
             )
+        ).pack(
+            side="left",
+            padx=5
+        )
+
+    def add_extra_song(
+        self,
+        sound_name
+    ):
+
+        filepath = filedialog.askopenfilename()
+
+        if not filepath:
+            return
+
+        name = Path(filepath).stem
+
+        self.sound_files[sound_name]["extras"].append(
+            {
+                "name": name,
+                "path": filepath
+            }
+        )
+
+    def remove_extra_song(
+        self,
+        sound_name,
+        index
+    ):
+
+        extras = self.sound_files[sound_name].get(
+            "extras",
+            []
+        )
+
+        if 0 <= index < len(extras):
+
+            extras.pop(index)
+
+    def rename_extra_song(
+        self,
+        sound_name,
+        index
+    ):
+
+        extras = self.sound_files[sound_name].get(
+            "extras",
+            []
+        )
+
+        if not (0 <= index < len(extras)):
+            return
+
+        current_name = extras[index].get("name", "")
+
+        new_name = simpledialog.askstring(
+            LANGUAGES[self.current_language]["rename_song"],
+            LANGUAGES[self.current_language]["rename_song_prompt"],
+            initialvalue=current_name
+        )
+
+        if new_name and new_name.strip():
+
+            extras[index]["name"] = new_name.strip()
 
     # ==================================================
     # EXPORTAR
@@ -774,13 +1163,13 @@ class SoundpackBuilderApp(ctk.CTk):
 
         missing_sounds = []
 
-        for sound_name, filepath in self.sound_files.items():
+        for sound_name in self.sound_files:
 
-            if filepath is None:
+            main_path = self._get_main_path(sound_name)
 
-                missing_sounds.append(
-                    sound_name
-                )
+            if main_path is None:
+
+                missing_sounds.append(sound_name)
 
         if missing_sounds:
 
@@ -813,7 +1202,8 @@ class SoundpackBuilderApp(ctk.CTk):
                 SoundpackExporter.create_soundpack(
                     destination_folder,
                     soundpack_name,
-                    self.sound_files
+                    self.sound_files,
+                    self.formats
                 )
             )
 
@@ -833,7 +1223,12 @@ class SoundpackBuilderApp(ctk.CTk):
                 str(error)
             )
 
+    # ==================================================
+    # FOOTER
+    # ==================================================
+
     def create_footer(self):
+
         self.footer_frame = ctk.CTkFrame(self)
 
         self.footer_frame.pack(
@@ -854,39 +1249,98 @@ class SoundpackBuilderApp(ctk.CTk):
             pady=10
         )
 
-    def create_export_button(self):
-
-        self.export_button = ctk.CTkButton(
-            self,
-            text=LANGUAGES[self.current_language]["create_pack"],
-            height=40,
-            command=self.create_soundpack
-            )
-
-        self.export_button.pack(
-            pady=20
-        )
+    # ==================================================
+    # ACCIONES
+    # ==================================================
 
     def new_project(self):
         pass
 
-
     def export_portable_project(self):
-        pass
 
+        project_name = self.pack_name_entry.get().strip()
+
+        if not project_name:
+
+            messagebox.showerror(
+                LANGUAGES[self.current_language]["error"],
+                LANGUAGES[self.current_language]["project_name"]
+            )
+
+            return
+
+        filepath = filedialog.asksaveasfilename(
+            defaultextension=".tsbz",
+            filetypes=[("TSB Portable Project", "*.tsbz")],
+            initialfile=project_name
+        )
+
+        if not filepath:
+            return
+
+        try:
+
+            PortableProjectManager.export(
+                filepath,
+                project_name,
+                self.sound_files
+            )
+
+            messagebox.showinfo(
+                LANGUAGES[self.current_language]["success"],
+                LANGUAGES[self.current_language]["portable_export_success"]
+            )
+
+        except Exception as error:
+
+            messagebox.showerror(
+                LANGUAGES[self.current_language]["error"],
+                str(error)
+            )
 
     def import_portable_project(self):
-        pass
 
+        filepath = filedialog.askopenfilename(
+            filetypes=[("TSB Portable Project", "*.tsbz")]
+        )
+
+        if not filepath:
+            return
+
+        result = PortableProjectManager.import_project(filepath)
+
+        if result is None:
+
+            messagebox.showerror(
+                LANGUAGES[self.current_language]["error"],
+                LANGUAGES[self.current_language]["portable_project_error"]
+            )
+
+            return
+
+        # Limpiar temp anterior si existía
+        self._cleanup_portable_tmp()
+
+        self._portable_tmp_dir = result["tmp_dir"]
+        self.is_portable_project = True
+
+        self.pack_name_entry.delete(0, "end")
+        self.pack_name_entry.insert(0, result["project_name"])
+
+        self.load_project_files(result["files"])
+
+        messagebox.showinfo(
+            LANGUAGES[self.current_language]["success"],
+            LANGUAGES[self.current_language]["portable_import_success"]
+        )
 
     def open_github(self):
         webbrowser.open(
-        "|https://github.com/Lizano1210/tico-soundpack-builder"
-    )
-        
-
+            "https://github.com/Lizano1210/tico-soundpack-builder"
+        )
 
     def show_install_guide(self):
+
         guide_window = ctk.CTkToplevel(self)
 
         guide_window.title(
@@ -936,8 +1390,8 @@ class SoundpackBuilderApp(ctk.CTk):
             pady=10
         )
 
-
     def show_about(self):
+
         about_window = ctk.CTkToplevel(self)
 
         about_window.title(

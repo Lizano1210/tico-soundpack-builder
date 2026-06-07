@@ -99,7 +99,17 @@ LANGUAGES = {
         "duplicate_song_name": "Ya existe una canción con ese nombre.",
         "additional_song_count": "Canciones adicionales: {count}",
         "main_song": "Canción principal",
-        "folders_enabled": "Admite canciones adicionales"
+        "folders_enabled": "Admite canciones adicionales",
+        "rename_song_prompt": "Ingresa un nuevo nombre para esta canción:",
+        "portable_project": "Proyecto Portátil",
+        "export_portable_project": "Exportar Proyecto Portátil",
+        "import_portable_project": "Importar Proyecto Portátil",
+        "portable_export_success": "Proyecto portátil exportado correctamente.",
+        "portable_import_success": "Proyecto portátil cargado. Los archivos son temporales hasta que guardes el proyecto localmente.",
+        "portable_project_error": "No se pudo importar el proyecto portátil. El archivo puede estar corrupto o falta project.json.",
+        "save_imported_project": "Guardar Proyecto Importado",
+        "portable_saved_location": "Proyecto guardado en: {path}",
+        "portable_project_loaded": "Este es un proyecto portátil. Selecciona una carpeta para guardar los archivos del proyecto localmente."
     },
 
     "en": {
@@ -203,7 +213,17 @@ LANGUAGES = {
         "duplicate_song_name": "A song with this name already exists.",
         "additional_song_count": "Additional songs: {count}",
         "main_song": "Main Song",
-        "folders_enabled": "Supports additional songs"
+        "folders_enabled": "Supports additional songs",
+        "rename_song_prompt": "Enter a new name for this song:",
+        "portable_project": "Portable Project",
+        "export_portable_project": "Export Portable Project",
+        "import_portable_project": "Import Portable Project",
+        "portable_export_success": "Portable project exported successfully.",
+        "portable_import_success": "Portable project loaded. Files are temporary until you save the project locally.",
+        "portable_project_error": "Could not import the portable project. The file may be corrupt or missing project.json.",
+        "save_imported_project": "Save Imported Project",
+        "portable_saved_location": "Project saved to: {path}",
+        "portable_project_loaded": "This is a portable project. Please select a folder to save the project files locally."
     },
 
     "pt": {
@@ -307,6 +327,17 @@ LANGUAGES = {
         "duplicate_song_name": "Já existe uma música com esse nome.",
         "additional_song_count": "Músicas adicionais: {count}",
         "main_song": "Música principal",
-        "folders_enabled": "Suporta músicas adicionais"
+        "folders_enabled": "Suporta músicas adicionais",
+        "rename_song_prompt": "Digite um novo nome para esta música:",
+        "portable_project": "Projeto Portátil",
+        "export_portable_project": "Exportar Projeto Portátil",
+        "import_portable_project": "Importar Projeto Portátil",
+        "portable_export_success": "Projeto portátil exportado com sucesso.",
+        "portable_import_success": "Projeto portátil carregado. Os arquivos são temporários até que você salve o projeto localmente.",
+        "portable_project_error": "Não foi possível importar o projeto portátil. O arquivo pode estar corrompido ou falta o project.json.",
+        "save_imported_project": "Salvar Projeto Importado",
+        "portable_saved_location": "Projeto salvo em: {path}",
+        "portable_project_loaded": "Este é um projeto portátil. Selecione uma pasta para salvar os arquivos do projeto localmente."
+    
     }
 }

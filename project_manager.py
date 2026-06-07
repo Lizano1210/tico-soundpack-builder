@@ -7,8 +7,9 @@ class ProjectManager:
     Gestiona la carga, guardado y validación
     de proyectos TSB.
     """
-    SUPPORTED_VERSIONS = [
-    "1.1"]
+    PROJECT_VERSION = "1.2"
+    SUPPORTED_VERSIONS = ["1.1", "1.2"]
+    
 
     @classmethod
     def is_supported_version(
@@ -111,94 +112,55 @@ class ProjectManager:
             return None
 
     @staticmethod
-    def validate_project(
-        project_data
-    ):
-        """
-        Funcionamiento:
-        Comprueba que la estructura
-        básica del proyecto sea válida.
-
-        Entradas:
-        - project_data (dict)
-
-        Salidas:
-        - valid (bool)
-        """
-
-        required_keys = [
-
-            "version",
-            "project_name",
-            "files"
-        ]
-
-        return all(
-            key in project_data
-            for key in required_keys
-        )
-
-    @staticmethod
-    def validate_files(
-        sound_files
-    ):
-        """
-        Funcionamiento:
-        Verifica qué archivos del proyecto
-        siguen existiendo.
-
-        Entradas:
-        - sound_files (dict)
-
-        Salidas:
-        - validation (dict)
-        """
+    def validate_files(sound_files):
 
         validation = {}
 
-        for sound_name, filepath in sound_files.items():
+        for sound_name, value in sound_files.items():
 
-            if not filepath:
+            if isinstance(value, dict):
 
-                validation[sound_name] = False
+                main = value.get("main")
+                validation[sound_name] = bool(main) and Path(main).exists()
 
-                continue
+            else:
 
-            validation[sound_name] = (
-                Path(filepath).exists()
-            )
+                if not value:
+                    validation[sound_name] = False
+                    continue
+
+                validation[sound_name] = Path(value).exists()
 
         return validation
 
     @staticmethod
-    def get_missing_files(
-        sound_files
-    ):
-        """
-        Funcionamiento:
-        Devuelve una lista con los sonidos
-        cuyos archivos ya no existen.
-
-        Entradas:
-        - sound_files (dict)
-
-        Salidas:
-        - missing_files (list)
-        """
+    def get_missing_files(sound_files):
 
         missing_files = []
 
-        for sound_name, filepath in sound_files.items():
+        for sound_name, value in sound_files.items():
 
-            if not filepath:
+            if isinstance(value, dict):
 
-                continue
+                main = value.get("main")
 
-            if not Path(filepath).exists():
+                if main and not Path(main).exists():
+                    missing_files.append(sound_name)
 
-                missing_files.append(
-                    sound_name
-                )
+                for extra in value.get("extras", []):
+                    path = extra.get("path")
+                    if path and not Path(path).exists():
+                        missing_files.append(
+                            f"{sound_name} → {extra.get('name', path)}"
+                        )
+
+            else:
+
+                if not value:
+                    continue
+
+                if not Path(value).exists():
+                    missing_files.append(sound_name)
 
         return missing_files
 
